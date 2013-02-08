@@ -17,7 +17,7 @@ class Member(object):
         assert(''.join(aFile.readlines()).find(aString) >= 0)
         return self
 
-    def contains(self, filename):
+    def shouldContain(self, filename):
         return self.whichContains(filename)
 
     def whichContains(self, filename):
@@ -25,14 +25,14 @@ class Member(object):
         self._archive.extract(
             member=self._membername, path=self._tempDir)
         return Archive(
-            os.path.join(self._tempDir, self._membername)).contains(filename)
+            os.path.join(self._tempDir, self._membername)).shouldContain(filename)
 
 
 class Archive(object):
     def __init__(self, filename):
         self._archive = zipfile.ZipFile(filename)
 
-    def contains(self, membername):
+    def shouldContain(self, membername):
         self._archive.getinfo(membername)
         return Member(self._archive, membername)
 
@@ -49,13 +49,13 @@ def verify(filename):
 
 if __name__ == '__main__':
     verify('test.zip')
-    it.contains('1.txt').withText("ohai").withText("ima kitteh")
-    it.contains('2.txt')
-    it.contains('3.txt')
-    it.contains('dir/a.txt')
+    it.shouldContain('1.txt').withText("ohai").withText("ima kitteh")
+    it.shouldContain('2.txt')
+    it.shouldContain('3.txt')
+    it.shouldContain('dir/a.txt')
     it.doesNotContain('nx.txt')
 
-    jar = it.contains('FakeJar.jar')
-    jar.contains("MANIFEST.MF").withText("ohai")
-    jar.contains('com/caplin/java/fake.class')
+    jar = it.shouldContain('FakeJar.jar')
+    jar.shouldContain("MANIFEST.MF").withText("ohai")
+    jar.shouldContain('com/caplin/java/fake.class')
 
