@@ -4,11 +4,16 @@ it = None
 
 class Member(object):
     def __init__(self, parent, membername):
-        self._parent = parent
+        self._archive = parent
         self._membername = membername
+        self._tempDir = None
+
+    def __del__(self):
+        if self._tempDir:
+            shutil.rmtree(self._tempDir)
 
     def withText(self, aString):
-        aFile = self._parent.zipfile().open(self._membername)
+        aFile = self._archive.open(self._membername)
         assert(''.join(aFile.readlines()).find(aString) >= 0)
         return self
 
@@ -16,33 +21,29 @@ class Member(object):
         return self.whichContains(filename)
 
     def whichContains(self, filename):
-        tempDir = tempfile.mkdtemp()
-        self._parent.zipfile().extract(
-            member=self._membername, path=tempDir)
-        return Verifier(
-            os.path.join(tempDir, self._membername)).contains(filename)
+        self._tempDir = tempfile.mkdtemp()
+        self._archive.extract(
+            member=self._membername, path=self._tempDir)
+        return Archive(
+            os.path.join(self._tempDir, self._membername)).contains(filename)
 
 
-class Verifier(object):
+class Archive(object):
     def __init__(self, filename):
-        self._filename = filename
-        self._zipfile = zipfile.ZipFile(filename)
-
-    def zipfile(self):
-        return self._zipfile
+        self._archive = zipfile.ZipFile(filename)
 
     def contains(self, membername):
-        self._zipfile.getinfo(membername)
-        return Member(self, membername)
+        self._archive.getinfo(membername)
+        return Member(self._archive, membername)
 
     def doesNotContain(self, membername):
-        for eachFile in self._zipfile.infolist():
+        for eachFile in self._archive.infolist():
             assert(eachFile.filename != membername)
         return self
 
 def verify(filename):
     global it
-    it = Verifier(filename)
+    it = Archive(filename)
     return it
 
 
