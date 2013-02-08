@@ -18,9 +18,9 @@ class Member(object):
         return self
 
     def shouldContain(self, filename):
-        return self.whichContains(filename)
+        return self.withArchive(filename)
 
-    def whichContains(self, filename):
+    def withArchive(self, filename):
         self._tempDir = tempfile.mkdtemp()
         self._archive.extract(
             member=self._membername, path=self._tempDir)
