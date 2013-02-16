@@ -41,6 +41,9 @@ class Archive(object):
             assert(eachFile.filename != membername)
         return self
 
+    def epicFail(self):
+        pass
+
 def verify(filename):
     global it
     it = Archive(filename)
@@ -48,7 +51,7 @@ def verify(filename):
 
 
 if __name__ == '__main__':
-    verify('test.zip')
+    verify('test.zip').epicFail()
     it.shouldContain('1.txt').withText("ohai").withText("ima kitteh")
     it.shouldContain('2.txt')
     it.shouldContain('3.txt')
